@@ -6,12 +6,13 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using YandexDiskSDK.Exceptions;
-using YandexDiskSDK.ResponceModels;
+using YandexDiskSDK.ResponseModels;
 
 namespace YandexDiskSDK
 {
     public class YandexOAuth
     {
+        private HttpClient Client { get; set; } = new HttpClient();
         public string OAuthToken { get; private set; }
         public string TokenType { get; private set; }
         public TimeSpan Duration { get; private set; }
@@ -29,9 +30,8 @@ namespace YandexDiskSDK
             };
 
             FormUrlEncodedContent content = new FormUrlEncodedContent(parameters);
-            HttpClient client = new HttpClient();
             string api = "https://oauth.yandex.ru/token";
-            HttpResponseMessage response = await client.PostAsync(api, content);
+            HttpResponseMessage response = await Client.PostAsync(api, content);
             
             string jsonString = await response.Content.ReadAsStringAsync();
             JToken json = JObject.Parse(jsonString);

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YandexDiskSDK.RequestModels;
 
-namespace YandexDiskSDK.ResponceModels
+namespace YandexDiskSDK.ResponseModels
 {
     public class ResourceList : IEnumerable<Resource>
     {

@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using YandexDiskSDK.Exceptions;
-using YandexDiskSDK.ResponceModels;
+using YandexDiskSDK.ResponseModels;
 using YandexDiskSDK.RequestModels;
 using System.Net.Http.Formatting;
 using System.IO;
@@ -23,17 +23,13 @@ namespace YandexDiskSDK
         private HttpClient client;
         private List<MediaTypeFormatter> formatters;
         
-        public DiskClient(string token) : this(token, null, null) { }
+        public DiskClient(string token) : this(token, null) { }
 
-        public DiskClient(string token, HttpClient httpClient) : this(token, httpClient, null) { }
-
-        public DiskClient(string token, JsonMediaTypeFormatter jsonFormatter): this(token, null, jsonFormatter) { }
-
-        public DiskClient(string token, HttpClient httpClient, JsonMediaTypeFormatter jsonFormatter)
+        public DiskClient(string token, JsonMediaTypeFormatter jsonFormatter)
         {
             ThrowIfNullArgument(token);
 
-            client = httpClient ?? new HttpClient();
+            client = new HttpClient();
             this.client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("OAuth", token);
             
             /* HttpResponseMessage.Content.ReadAsAsync<T> use by default IEnumerable<MediaTypeFormatter>
