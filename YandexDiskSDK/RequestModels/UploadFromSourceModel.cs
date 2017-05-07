@@ -12,7 +12,7 @@ namespace YandexDiskSDK.RequestModels
     {
         public string Url { get; private set; }
         public string Path { get; private set; }
-        public List<string> Fileds { get; set; }
+        public List<string> Fields { get; set; }
         public bool? DisableRedirects { get; set; }
 
         public UploadFromSourceModel(string fileUrl, string diskPath)
@@ -36,7 +36,7 @@ namespace YandexDiskSDK.RequestModels
         {
             AddParameter("url", () => WebUtility.UrlEncode(this.Url));
             AddParameter(this.PathParameter(this.Path));
-            AddParameter(this.FieldsParameter(this.Fileds));
+            AddParameter(this.FieldsParameter(this.Fields));
             AddParameter("disable_redirects", this.DisableRedirects);
         }
     }
