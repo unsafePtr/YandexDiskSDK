@@ -11,9 +11,9 @@ string token = await yandexAuth.GetTokenAsync(confirmationCode, clientId, client
 DiskClient client = new DiskClient(token);
 ```
 
-And there is constructors where you can inject already created HttpClient or proper JsonMediaTypeFormatter.
+And there is constructors where you can inject your own JsonMediaTypeFormatter.
 ```c#
-DiskClient client = new DiskClient("token", new HttpClient());
+DiskClient client = new DiskClient("token", new CustomeJsonMediaTypeFormatter());
 ```
 
 Almost all methods to communicate with api require request model.
