@@ -12,6 +12,7 @@ using YandexDiskSDK.ResponseModels;
 using YandexDiskSDK.RequestModels;
 using System.Net.Http.Formatting;
 using System.IO;
+using System.Threading;
 
 namespace YandexDiskSDK
 {
@@ -73,11 +74,16 @@ namespace YandexDiskSDK
 
         public async Task UploadAsync(UploadModel model, byte[] file)
         {
-            ThrowIfNullArgument(file);
+            await UploadAsync(model, file, CancellationToken.None);
+        }
 
+        public async Task UploadAsync(UploadModel model, byte[] file, CancellationToken cancellationToken)
+        {
+            ThrowIfNullArgument(file);
+            
             Link link = await GetAsync<UploadModel, Link>(model);
             ByteArrayContent content = new ByteArrayContent(file);
-            using (var response = await client.PutAsync(link.Href, content))
+            using (var response = await client.PutAsync(link.Href, content, cancellationToken))
             {
                 await ThrowIfIsNotExpectedResponseCode(response, HttpStatusCode.Created);
             }
@@ -85,34 +91,63 @@ namespace YandexDiskSDK
 
         public async Task UploadAsync(UploadModel model, byte[] file, Action<decimal> progressCallback)
         {
+            await UploadAsync(model, file, progressCallback, CancellationToken.None);
+        }
+
+        public async Task UploadAsync(UploadModel model, byte[] file, Action<decimal> progressCallback, CancellationToken cancellationToken)
+        {
             ThrowIfNullArgument(file);
             ThrowIfNullArgument(progressCallback);
 
             Link link = await GetAsync<UploadModel, Link>(model);
             ProgressableContent content = new ProgressableContent(file, progressCallback);
-            using (var response = await client.PutAsync(link.Href, content))
+            using (var response = await client.PutAsync(link.Href, content, cancellationToken))
             {
                 await ThrowIfIsNotExpectedResponseCode(response, HttpStatusCode.Created);
             }
-        }        
+        }
 
-        public async Task<Link> UploadFromSourceAsync(UploadFromSourceModel model)
+        public async Task<bool> UploadFromSourceAsync(UploadFromSourceModel model, TimeSpan? checkTiming = null)
         {
             ThrowIfNullArgument(model);
+
+            checkTiming = checkTiming ?? new TimeSpan(0, 0, 6);
 
             string url = model.RequestUrl(api);
             using (var response = await client.PostAsync(url, null))
             {
                 await ThrowIfIsNotExpectedResponseCode(response, HttpStatusCode.Accepted);
+                Link pendingResourceLink = await ReadAsAsync<Link>(response);
                 
-                return await ReadAsAsync<Link>(response);
+                while (true)
+                {
+                    OperationStatus operationStatus = await OperationStatusAsync(pendingResourceLink);
+
+                    if(operationStatus.Status == "success")
+                    {
+                        return true;
+                    }
+                    else if(operationStatus.Status == "failed")
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        await Task.Delay((TimeSpan)checkTiming);
+                    }
+                }
             }
         }
 
         public async Task<byte[]> DownloadAsync(DownloadModel model)
         {
+            return await DownloadAsync(model, CancellationToken.None);
+        }
+
+        public async Task<byte[]> DownloadAsync(DownloadModel model, CancellationToken cancellationToken)
+        {
             Link link = await GetAsync<DownloadModel, Link>(model);
-            using (var response = await client.GetAsync(link.Href))
+            using (var response = await client.GetAsync(link.Href, cancellationToken))
             {
                 await ThrowIfIsNotExpectedResponseCode(response, HttpStatusCode.OK);
 
@@ -127,13 +162,18 @@ namespace YandexDiskSDK
 
         public async Task<byte[]> DownloadAsync(DownloadModel model, Action<decimal> progressCallback)
         {
+            return await DownloadAsync(model, progressCallback, CancellationToken.None);
+        }
+
+        public async Task<byte[]> DownloadAsync(DownloadModel model, Action<decimal> progressCallback, CancellationToken cancellationToken)
+        {
             ThrowIfNullArgument(progressCallback);
 
             Link link = await GetAsync<DownloadModel, Link>(model);
-            using (var response = await client.GetAsync(link.Href, HttpCompletionOption.ResponseHeadersRead))
+            using (var response = await client.GetAsync(link.Href, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
             {
                 await ThrowIfIsNotExpectedResponseCode(response, HttpStatusCode.OK);
-                
+
                 long? totalBytes = response.Content.Headers.ContentLength.Value;
                 // rest api always return non-nullable ContentLength
                 // does not need to check for null
@@ -147,7 +187,7 @@ namespace YandexDiskSDK
                     byte[] buffer = new byte[bufferSize];
                     long totalReaded = 0L;
                     int bufferBytesReaded = 0;
-                    
+
                     while ((bufferBytesReaded = await stream.ReadAsync(buffer, 0, bufferSize)) > 0)
                     {
                         await memoryStream.WriteAsync(buffer, 0, bufferBytesReaded);
@@ -161,7 +201,7 @@ namespace YandexDiskSDK
                 }
             }
         }
-
+        
         public async Task<Link> DeleteAsync(DeleteResourceModel model)
         {
             ThrowIfNullArgument(model);
