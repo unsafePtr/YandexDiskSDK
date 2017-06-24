@@ -29,7 +29,7 @@ namespace YandexDiskSDK
         {
             for (int i = 0; i < this.content.Length; i += chunkSize)
             {
-                await stream.WriteAsync(this.content, i, Math.Min(chunkSize, this.content.Length - i));
+                await stream.WriteAsync(this.content, i, Math.Min(chunkSize, this.content.Length - i)).ConfigureAwait(false);
                 this.progress(100m * (i + 4096) / this.content.Length);
             }
         }

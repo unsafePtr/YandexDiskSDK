@@ -31,9 +31,9 @@ namespace YandexDiskSDK
 
             FormUrlEncodedContent content = new FormUrlEncodedContent(parameters);
             string api = "https://oauth.yandex.ru/token";
-            HttpResponseMessage response = await Client.PostAsync(api, content);
+            HttpResponseMessage response = await Client.PostAsync(api, content).ConfigureAwait(false);
             
-            string jsonString = await response.Content.ReadAsStringAsync();
+            string jsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             JToken json = JObject.Parse(jsonString);
 
             JToken error = json.SelectToken("error");
