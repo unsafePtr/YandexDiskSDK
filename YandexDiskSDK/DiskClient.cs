@@ -23,15 +23,21 @@ namespace YandexDiskSDK
 
         private const string api = "https://cloud-api.yandex.net/v1/disk/";
         private HttpClient client;
+        private bool ownsHttpClient;
         private List<MediaTypeFormatter> formatters;
         
-        public DiskClient(string token) : this(token, null) { }
+        public DiskClient(string token) : this(token, null, null) { }
 
-        public DiskClient(string token, JsonMediaTypeFormatter jsonFormatter)
+        public DiskClient(string token, HttpClient httpClient) : this(token, httpClient, null) { }
+
+        public DiskClient(string token, JsonMediaTypeFormatter jsonFormatter) : this(token, null, jsonFormatter) { }
+
+        public DiskClient(string token, HttpClient httpClient, JsonMediaTypeFormatter jsonFormatter)
         {
             ThrowIfNullArgument(token);
 
-            client = new HttpClient();
+            ownsHttpClient = httpClient == null ? true : false;
+            client = httpClient ?? new HttpClient();
             this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", token);
             
             /* HttpResponseMessage.Content.ReadAsAsync<T> use by default IEnumerable<MediaTypeFormatter>
@@ -304,7 +310,10 @@ namespace YandexDiskSDK
 
         public void Dispose()
         {
-            this.client.Dispose();
+            if (ownsHttpClient)
+            {
+                this.client.Dispose();
+            }
         }
     }
 }
