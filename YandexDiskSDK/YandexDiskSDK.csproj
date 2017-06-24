@@ -61,7 +61,6 @@
     <Compile Include="Exceptions\HttpDiskException.cs" />
     <Compile Include="ProgressableContent.cs" />
     <Compile Include="ResponseModels\OperationStatus.cs" />
-    <Compile Include="Static\MemorySizeParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequestModels\BaseRequestModel.cs" />
     <Compile Include="RequestModels\CopyOrMoveFolderModel.cs" />
@@ -70,7 +69,7 @@
     <Compile Include="RequestModels\DownloadModel.cs" />
     <Compile Include="RequestModels\LastUploadedModel.cs" />
     <Compile Include="RequestModels\MediaType.cs" />
-    <Compile Include="Static\RequestParametersExtensions.cs" />
+    <Compile Include="Extensions\RequestParametersExtensions.cs" />
     <Compile Include="RequestModels\ResourceInfoModel.cs" />
     <Compile Include="RequestModels\SearchModel.cs" />
     <Compile Include="RequestModels\UploadFromSourceModel.cs" />

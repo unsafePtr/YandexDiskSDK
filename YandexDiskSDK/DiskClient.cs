@@ -283,10 +283,13 @@ namespace YandexDiskSDK
             }
         }
 
-        private void ThrowIfNullArgument(object obj)
+        private void ThrowIfNullArgument<T>(Nullable<T> obj)
+            where T : struct
         {
-            if (obj == null)
+            if (!obj.HasValue)
+            {
                 throw new ArgumentNullException();
+            }
         }
         
         private async Task ThrowIfIsNotExpectedResponseCode(HttpResponseMessage response, HttpStatusCode code)
