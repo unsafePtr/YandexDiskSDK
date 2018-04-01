@@ -1,3 +1,6 @@
+# Repository is archived 
+Since this repository wasn't updated for a long time is achieved in favor of [another project for Yandex Disk](https://github.com/raidenyn/yandexdisk.client). It provides the same functionality with some additional features and is actively maintained.
+
 # Description
 A library for providing simple working operation with Yandex Disk written in c# with asynchronous manner. Library communicates with [cloud REST API](https://tech.yandex.com/disk/rest/).
 # Quickstart
